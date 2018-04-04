@@ -1,0 +1,29 @@
+{
+    "manifest_version": 2,
+    "name": "Speed Reading Mode",
+    "version": "0.1",
+    "description": "Improve reading speed by removing distraction and the need to move our eyes",
+    "icons": {
+        "48": "icons/speed-reading-black-512.png"
+    },
+    "permissions": [
+        "storage"
+    ],
+    "browser_action": {
+        "browser_style": true,
+        "default_popup": "popup/index.html",
+        "default_icon": {
+            "512": "icons/speed-reading-black-512.png"
+        }
+    },
+    "content_scripts": [
+        {
+            "matches": ["<all_urls>"],
+            "css": ["style.css"],
+            "js": ["readability.js", "speed-read.js"]
+        }
+    ],
+    "web_accessible_resources": [
+        "fonts/slabo 27px/Slabo27px-Regular.ttf"
+    ]
+}

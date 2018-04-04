@@ -1,0 +1,19 @@
+* {
+	box-sizing: border-box;
+	font-size: 1em;
+}
+html, body {
+	min-width: 300px;
+}
+body {
+	padding: 10px;
+}
+input {
+	line-height: 2em;
+}
+input, button {
+	width: 100%;
+}
+button {
+	text-align: center;
+}

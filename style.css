@@ -1,0 +1,69 @@
+@font-face {
+  font-family: 'Slabo 27px';
+  font-style: normal;
+  font-weight: 400;
+  src: local('Slabo 27px'),
+       local('Slabo27px-Regular'),
+       url(moz-extension://__MSG_@@extension_id__/fonts/Roboto-Regular.ttf) format('ttf')
+       url(chrome-extension://__MSG_@@extension_id__/fonts/Roboto-Regular.ttf) format('ttf');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+
+#speed-read-container {
+    background: #ffffff;
+    z-index: 999999;
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100%;
+    width: 100%;
+    display: none;
+}
+#speed-read-container.active {
+    display: block;
+}
+#speed-read-center-text {
+    font-family: 'Slabo 27px';
+    top: 50%;
+    left: 50%;
+    position: absolute;
+    transform: translate(-50%,-50%);
+    font-size: 3em;
+}
+.speed-read-nav {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    padding: 10px 15px 0;
+    line-height: 1;
+}
+.speed-read-button-group svg {
+    width: 3em;
+    height: 3em;
+}
+.speed-read-button-group span {
+    cursor: pointer;
+}
+.speed-read-float-left {
+    float: left;
+}
+.speed-read-float-right {
+    float: right;
+}
+.speed-read-clearfix {
+    clear: both;
+}
+.speed-read-range {
+    display: block;
+    width: 100%;
+}
+.speed-read-range input {
+    width: 100%;
+}
+.speed-read-range input:active,
+.speed-read-range input::-moz-focus-outer {
+    outline: none;
+    border: none;
+}
