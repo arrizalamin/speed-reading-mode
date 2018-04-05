@@ -31,6 +31,15 @@
     transform: translate(-50%,-50%);
     font-size: 3em;
 }
+#speed-read-time-remaining {
+    font-family: 'Slabo 27px';
+    font-size: 1em;
+    font-stretch: ultra-condensed;
+    line-height: 0;
+    vertical-align: middle;
+    font-weight: bold;
+    margin-left: 1em;
+}
 .speed-read-nav {
     position: absolute;
     top: 0;
@@ -42,6 +51,7 @@
 .speed-read-button-group svg {
     width: 3em;
     height: 3em;
+    vertical-align: middle;
 }
 .speed-read-button-group span {
     cursor: pointer;

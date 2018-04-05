@@ -15,6 +15,7 @@ const insertContainer = function() {
 				<span id="speed-read-back-5s">
 					<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-rewind"><polygon points="11 19 2 12 11 5 11 19"></polygon><polygon points="22 19 13 12 22 5 22 19"></polygon></svg>
 				</span>
+				<span id="speed-read-time-remaining"></span>
 			</div>
 			<div class="speed-read-button-group speed-read-float-right">
 				<span id="speed-read-close-button">
@@ -36,10 +37,9 @@ class SpeedRead {
 		this.article = article;
 		this.cancelled = false;
 		this.delays = {
-			WORD: 60000 / settings.wpm,
-			PARAGRAPH_END: settings.paragraph_end,
+			WORD: 60000 / parseInt(settings.wpm),
+			PARAGRAPH_END: parseInt(settings.paragraph_end),
 		}
-		this.navRange = navRange;
 		this.type = {
 			WORD: 0,
 			PARAGRAPH_END: 1,
@@ -49,10 +49,15 @@ class SpeedRead {
 		this.buildIndexes();
 		this.counter = 0;
 		this.totalIndex = this.indexes.length;
-		navRange.setAttribute('max', this.totalIndex);
+
+		this.navRange = navRange;
+		navRange.setAttribute('max', this.totalIndex - 1);
 		navRange.addEventListener('change', function(e) {
 			this.counter = parseInt(e.target.value);
+			this.calculateTimeRemaining();
 		}.bind(this));
+
+		this.calculateTimeRemaining();
 	}
 
 	isCancelled() {
@@ -65,6 +70,7 @@ class SpeedRead {
 
 	increment() {
 		if (this.totalIndex - this.counter > 1) {
+			this.timeRemaining -= this.indexes[this.counter][2];
 			this.counter += 1;
 			this.navRange.value = this.counter;
 		}
@@ -72,6 +78,7 @@ class SpeedRead {
 
 	restart() {
 		this.counter = 0;
+		this.calculateTimeRemaining();
 	}
 
 	rewind(time = 5000) {
@@ -79,6 +86,7 @@ class SpeedRead {
 			time = time - this.indexes[this.counter][2];
 			this.counter -= 1;
 		}
+		this.calculateTimeRemaining();
 	}
 
 	buildIndexes() {
@@ -93,6 +101,25 @@ class SpeedRead {
 	    	return [...list, ...indexes, ['', type.PARAGRAPH_END, delays.PARAGRAPH_END]];
 	    }, []);
 	    this.indexes = [...indexes, ['', type.ARTICLE_END, 1000]];
+	}
+
+	calculateTimeRemaining() {
+		const indexes = this.indexes.slice(this.counter);
+		this.timeRemaining = indexes.reduce(function(time, index) {
+			return time + index[2];
+		}, 0);
+	}
+
+	getHumanReadableTimeRemaining() {
+		const minutes = Math.floor(this.timeRemaining / (1000 * 60));
+		if (minutes > 1) {
+			return minutes + ' minutes left';
+		}
+		if (minutes == 1) {
+			return minutes + ' minute left';
+		}
+		const seconds = Math.floor(this.timeRemaining / 1000);
+		return seconds + ' seconds left';
 	}
 }
 
@@ -122,9 +149,11 @@ const openContainer = async function(settings) {
 
 const run = async function(speedRead) {
     const centerText = document.getElementById('speed-read-center-text');
+    const timeRemaining = document.getElementById('speed-read-time-remaining')
 
     while (!speedRead.isCancelled()) {
     	const [val, type, delay] = speedRead.indexes[speedRead.counter];
+    	timeRemaining.textContent = speedRead.getHumanReadableTimeRemaining();
     	switch (type) {
     		case speedRead.type.WORD:
     			centerText.textContent = val;
