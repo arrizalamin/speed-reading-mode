@@ -21,6 +21,7 @@ form.addEventListener("submit", function(e) {
 		active: true
 	})
 	.then(sendMessage(formDataObj))
+	.then(() => window.close())
 	.catch(console.error);
 });
 
