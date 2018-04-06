@@ -33,26 +33,28 @@ const insertContainer = function() {
 };
 
 class SpeedRead {
-	constructor(article, navRange, settings) {
+	constructor(article, settings) {
 		this.article = article;
 		this.cancelled = false;
 		this.delays = {
 			WORD: 60000 / parseInt(settings.wpm),
 			PARAGRAPH_END: parseInt(settings.paragraph_end),
-		}
+		};
 		this.type = {
 			WORD: 0,
 			PARAGRAPH_END: 1,
 			ARTICLE_END: 2,
-		}
+		};
+        this.nodes = {
+            range: document.getElementById('speed-read-range'),
+        };
 
 		this.buildIndexes();
 		this.counter = 0;
 		this.totalIndex = this.indexes.length;
 
-		this.navRange = navRange;
-		navRange.setAttribute('max', this.totalIndex - 1);
-		navRange.addEventListener('change', function(e) {
+		this.nodes.range.setAttribute('max', this.totalIndex - 1);
+		this.nodes.range.addEventListener('change', function(e) {
 			this.counter = parseInt(e.target.value);
 			this.calculateTimeRemaining();
 		}.bind(this));
@@ -72,7 +74,7 @@ class SpeedRead {
 		if (this.totalIndex - this.counter > 1) {
 			this.timeRemaining -= this.indexes[this.counter][2];
 			this.counter += 1;
-			this.navRange.value = this.counter;
+			this.nodes.range.value = this.counter;
 		}
 	}
 
@@ -134,9 +136,8 @@ const openContainer = async function(settings) {
     const closeButton = document.getElementById('speed-read-close-button');
     const restartButton = document.getElementById('speed-read-restart-button');
     const rewindButton = document.getElementById('speed-read-back-5s');
-    const range = document.getElementById('speed-read-range');
 
-    const speedRead = new SpeedRead(articleContent, range, settings);
+    const speedRead = new SpeedRead(articleContent, settings);
 
     closeButton.addEventListener('click', function() {
     	speedRead.cancel();
