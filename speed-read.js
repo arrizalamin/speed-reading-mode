@@ -36,6 +36,7 @@ class SpeedRead {
 	constructor(article, settings) {
 		this.article = article;
 		this.cancelled = false;
+        this.paused = false;
 		this.delays = {
 			WORD: 60000 / parseInt(settings.wpm),
 			PARAGRAPH_END: parseInt(settings.paragraph_end),
@@ -46,6 +47,8 @@ class SpeedRead {
 			ARTICLE_END: 2,
 		};
         this.nodes = {
+            container: document.getElementById('speed-read-container'),
+            centerText: document.getElementById('speed-read-center-text'),
             range: document.getElementById('speed-read-range'),
         };
 
@@ -53,10 +56,19 @@ class SpeedRead {
 		this.counter = 0;
 		this.totalIndex = this.indexes.length;
 
+        this.nodes.container.addEventListener('click', function(e) {
+            // This conditional is ugly and probably will lead to a bug in the future
+            // TODO: remove this
+            if (e.originalTarget == this.nodes.container ||
+                e.originalTarget == this.nodes.centerText) {
+                this.togglePause();
+            }
+        }.bind(this));
+
 		this.nodes.range.setAttribute('max', this.totalIndex - 1);
 		this.nodes.range.addEventListener('change', function(e) {
 			this.counter = parseInt(e.target.value);
-			this.calculateTimeRemaining();
+            this.calculateTimeRemaining();
 		}.bind(this));
 
 		this.calculateTimeRemaining();
@@ -69,6 +81,18 @@ class SpeedRead {
 	cancel() {
 		this.cancelled = true;
 	}
+
+    isPaused() {
+        return this.paused;
+    }
+
+    togglePause() {
+        this.paused = !(this.paused);
+    }
+
+    pause() {
+        this.paused = true;
+    }
 
 	increment() {
 		if (this.totalIndex - this.counter > 1) {
@@ -155,6 +179,9 @@ const run = async function(speedRead) {
     while (!speedRead.isCancelled()) {
     	const [val, type, delay] = speedRead.indexes[speedRead.counter];
     	timeRemaining.textContent = speedRead.getHumanReadableTimeRemaining();
+        while (speedRead.isPaused()) {
+            await sleep(500);
+        }
     	switch (type) {
     		case speedRead.type.WORD:
     			centerText.textContent = val;
