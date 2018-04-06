@@ -10,11 +10,17 @@ const insertContainer = function() {
 		<div class="speed-read-nav">
 			<div class="speed-read-button-group speed-read-float-left">
 				<span id="speed-read-restart-button">
-					<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-skip-back"><polygon points="19 20 9 12 19 4 19 20"></polygon><line x1="5" y1="19" x2="5" y2="5"></line></svg>
+					<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-skip-back"><polygon points="19 20 9 12 19 4"></polygon><line x1="5" y1="19" x2="5" y2="5"></line></svg>
 				</span>
 				<span id="speed-read-back-5s">
-					<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-rewind"><polygon points="11 19 2 12 11 5 11 19"></polygon><polygon points="22 19 13 12 22 5 22 19"></polygon></svg>
+					<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-rewind"><polygon points="11 19 2 12 11 5"></polygon><polygon points="22 19 13 12 22 5"></polygon></svg>
 				</span>
+                <span id="speed-read-pause">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-rewind"><line x1="8" y1="19" x2="8" y2="5"></line><line x1="16" y1="19" x2="16" y2="5"></line></svg>
+                </span>
+                <span id="speed-read-resume" style="display:none">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-rewind"><polygon points="8 19 17 12 8 5"></polygon></svg>
+                </span>
 				<span id="speed-read-time-remaining"></span>
 			</div>
 			<div class="speed-read-button-group speed-read-float-right">
@@ -49,6 +55,8 @@ class SpeedRead {
         this.nodes = {
             container: document.getElementById('speed-read-container'),
             centerText: document.getElementById('speed-read-center-text'),
+            pause: document.getElementById('speed-read-pause'),
+            resume: document.getElementById('speed-read-resume'),
             range: document.getElementById('speed-read-range'),
         };
 
@@ -61,13 +69,20 @@ class SpeedRead {
             // TODO: remove this
             if (e.originalTarget == this.nodes.container ||
                 e.originalTarget == this.nodes.centerText) {
-                this.togglePause();
+                this.setPaused(!this.paused);
             }
+        }.bind(this));
+
+        this.nodes.pause.addEventListener('click', function(e) {
+            this.setPaused(true);
+        }.bind(this));
+        this.nodes.resume.addEventListener('click', function(e) {
+            this.setPaused(false);
         }.bind(this));
 
 		this.nodes.range.setAttribute('max', this.totalIndex - 1);
 		this.nodes.range.addEventListener('change', function(e) {
-			this.counter = parseInt(e.target.value);
+            this.counter = parseInt(e.target.value);
             this.calculateTimeRemaining();
 		}.bind(this));
 
@@ -86,12 +101,15 @@ class SpeedRead {
         return this.paused;
     }
 
-    togglePause() {
-        this.paused = !(this.paused);
-    }
-
-    pause() {
-        this.paused = true;
+    setPaused(val) {
+        this.paused = val;
+        if (val) {
+            this.nodes.pause.style.display = 'none';
+            this.nodes.resume.style.display = 'initial';
+        } else {
+            this.nodes.pause.style.display = 'initial';
+            this.nodes.resume.style.display = 'none';
+        }
     }
 
 	increment() {
