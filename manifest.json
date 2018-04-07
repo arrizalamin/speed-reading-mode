@@ -20,7 +20,7 @@
         {
             "matches": ["<all_urls>"],
             "css": ["style.css"],
-            "js": ["readability.js", "speed-read.js"]
+            "js": ["readability.js", "parser.js", "speed-read.js"]
         }
     ],
     "web_accessible_resources": [

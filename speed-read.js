@@ -39,55 +39,56 @@ const insertContainer = function() {
 };
 
 class SpeedRead {
-	constructor(article, settings) {
-		this.article = article;
+	constructor(tokens, settings) {
+		this.tokens = tokens;
 		this.cancelled = false;
         this.paused = false;
-		this.delays = {
-			WORD: 60000 / parseInt(settings.wpm),
-			PARAGRAPH_END: parseInt(settings.paragraph_end),
-		};
-		this.type = {
-			WORD: 0,
-			PARAGRAPH_END: 1,
-			ARTICLE_END: 2,
-		};
+        this.counter = 0;
+        this.totalTokens = tokens.length;
+
         this.nodes = {
             container: document.getElementById('speed-read-container'),
             centerText: document.getElementById('speed-read-center-text'),
             pause: document.getElementById('speed-read-pause'),
             resume: document.getElementById('speed-read-resume'),
             range: document.getElementById('speed-read-range'),
+            close: document.getElementById('speed-read-close-button'),
+            restart: document.getElementById('speed-read-restart-button'),
+            rewind: document.getElementById('speed-read-back-5s'),
         };
+        this.prepareDOM();
 
-		this.buildIndexes();
-		this.counter = 0;
-		this.totalIndex = this.indexes.length;
+	}
 
-        this.nodes.container.addEventListener('click', function(e) {
+    prepareDOM() {
+        this.nodes.pause.addEventListener('click', e => this.setPaused(true));
+        this.nodes.resume.addEventListener('click', e => this.setPaused(false));
+        this.nodes.container.addEventListener('click', e => {
             // This conditional is ugly and probably will lead to a bug in the future
             // TODO: remove this
             if (e.originalTarget == this.nodes.container ||
                 e.originalTarget == this.nodes.centerText) {
                 this.setPaused(!this.paused);
             }
-        }.bind(this));
+        });
 
-        this.nodes.pause.addEventListener('click', function(e) {
-            this.setPaused(true);
-        }.bind(this));
-        this.nodes.resume.addEventListener('click', function(e) {
-            this.setPaused(false);
-        }.bind(this));
-
-		this.nodes.range.setAttribute('max', this.totalIndex - 1);
-		this.nodes.range.addEventListener('change', function(e) {
+        this.nodes.range.setAttribute('max', this.totalTokens - 1);
+        this.nodes.range.addEventListener('change', e => {
             this.counter = parseInt(e.target.value);
             this.calculateTimeRemaining();
-		}.bind(this));
+        });
 
-		this.calculateTimeRemaining();
-	}
+        this.nodes.restart.addEventListener('click', e => this.restart());
+        this.nodes.rewind.addEventListener('click', e => this.rewind());
+        this.nodes.close.addEventListener('click', e => this.cancel());
+
+        this.calculateTimeRemaining();
+    }
+
+    openContainer() {
+        this.nodes.container.classList.add('active');
+        window.scrollTo(0, 0);
+    }
 
 	isCancelled() {
 		return this.cancelled;
@@ -95,6 +96,7 @@ class SpeedRead {
 
 	cancel() {
 		this.cancelled = true;
+        this.nodes.container.classList.remove('active');
 	}
 
     isPaused() {
@@ -113,8 +115,8 @@ class SpeedRead {
     }
 
 	increment() {
-		if (this.totalIndex - this.counter > 1) {
-			this.timeRemaining -= this.indexes[this.counter][2];
+		if (this.totalTokens - this.counter > 1) {
+			this.timeRemaining -= this.tokens[this.counter][2];
 			this.counter += 1;
 			this.nodes.range.value = this.counter;
 		}
@@ -127,30 +129,16 @@ class SpeedRead {
 
 	rewind(time = 5000) {
 		while (time > 0) {
-			time = time - this.indexes[this.counter][2];
+			time = time - this.tokens[this.counter][2];
 			this.counter -= 1;
 		}
 		this.calculateTimeRemaining();
 	}
 
-	buildIndexes() {
-		const delays = this.delays;
-		const type = this.type;
-	    let indexes = this.article.filter(tag => tag.nodeName == 'P');
-	    indexes = indexes.reduce(function(list, paragraph) {
-	    	const tokens = paragraph.innerText.split(' ');
-	    	const indexes = tokens.reduce(function(carry, word) {
-	    		return [...carry, [word, type.WORD, delays.WORD]]
-	    	}, []);
-	    	return [...list, ...indexes, ['', type.PARAGRAPH_END, delays.PARAGRAPH_END]];
-	    }, []);
-	    this.indexes = [...indexes, ['', type.ARTICLE_END, 1000]];
-	}
-
 	calculateTimeRemaining() {
-		const indexes = this.indexes.slice(this.counter);
-		this.timeRemaining = indexes.reduce(function(time, index) {
-			return time + index[2];
+		const tokens = this.tokens.slice(this.counter);
+		this.timeRemaining = tokens.reduce(function(time, token) {
+			return time + token[2];
 		}, 0);
 	}
 
@@ -167,46 +155,35 @@ class SpeedRead {
 	}
 }
 
-const openContainer = async function(settings) {
+const run = async function(settings) {
     let articleContent = readability.grabArticle();
     articleContent = [...articleContent.childNodes[0].childNodes];
-    articleContent = articleContent.filter(tag => tag.nodeName == 'P');
 
-    const container = document.getElementById('speed-read-container');
-    container.classList.add('active');
-    window.scrollTo(0, 0);
-    const closeButton = document.getElementById('speed-read-close-button');
-    const restartButton = document.getElementById('speed-read-restart-button');
-    const rewindButton = document.getElementById('speed-read-back-5s');
+    const wait = {
+        WORD: 60000 / parseInt(settings.wpm),
+        PARAGRAPH_END: parseInt(settings.paragraph_end),
+        ARTICLE_END: 1000,
+    };
+    const tokens = parseArticle(articleContent, wait);
+    const speedRead = new SpeedRead(tokens, settings);
 
-    const speedRead = new SpeedRead(articleContent, settings);
-
-    closeButton.addEventListener('click', function() {
-    	speedRead.cancel();
-    	container.classList.remove('active');
-    });
-    restartButton.addEventListener('click', () => speedRead.restart());
-    rewindButton.addEventListener('click', () => speedRead.rewind());
-    run(speedRead);
-};
-
-const run = async function(speedRead) {
     const centerText = document.getElementById('speed-read-center-text');
     const timeRemaining = document.getElementById('speed-read-time-remaining')
 
+    speedRead.openContainer();
     while (!speedRead.isCancelled()) {
-    	const [val, type, delay] = speedRead.indexes[speedRead.counter];
+    	const [val, type, delay] = speedRead.tokens[speedRead.counter];
     	timeRemaining.textContent = speedRead.getHumanReadableTimeRemaining();
         while (speedRead.isPaused()) {
             await sleep(500);
         }
     	switch (type) {
-    		case speedRead.type.WORD:
+    		case TokenName.WORD:
     			centerText.textContent = val;
     			await sleep(delay);
     			break;
-    		case speedRead.type.PARAGRAPH_END:
-    		case speedRead.type.ARTICLE_END:
+    		case TokenName.PARAGRAPH_END:
+    		case TokenName.ARTICLE_END:
     			await sleep(delay);
     			break;
     	}
@@ -216,5 +193,5 @@ const run = async function(speedRead) {
 
 insertContainer();
 browser.runtime.onMessage.addListener(function(settings) {
-	openContainer(settings);
+	run(settings);
 })
