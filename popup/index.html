@@ -8,11 +8,21 @@
 		<form id="popup-form" class="browser-style">
 			<label for="wpm" class="browser-style-label">Words per minute</label>
 			<div class="browser-style">
-				<input type="number" name="wpm" id="wpm" placeholder="Words per minute">
+				<input type="number" name="wpm" id="wpm" placeholder="Words per minute" value=400>
 			</div>
-			<label for="paragraph_end" class="browser-style-label">End of paragraph delay (ms)</label>
+			<label for="paragraph_end" class="browser-style-label">Delay between paragraph (ms)</label>
 			<div class="browser-style">
-				<input type="number" name="paragraph_end" id="paragraph_end" placeholder="End of paragraph delay (ms)">
+				<input type="number" name="paragraph_end" id="paragraph_end" placeholder="Delay between paragraph (ms)" value=1000>
+			</div>
+			<div class="browser-style">
+				<input type="checkbox" id="pause_img" checked="true">
+				<label for="pause_img">Pause on image</label>
+			</div>
+			<div id="image-duration-wrapper" style="display:none">
+				<label for="image" class="browser-style-label">Image display duration (ms)</label>
+				<div class="browser-style">
+					<input type="number" name="image" id="image" placeholder="Image display duration (ms)" value=0>
+				</div>
 			</div>
 			<button type="submit" class="browser-style default">Start</button>
 		</form>

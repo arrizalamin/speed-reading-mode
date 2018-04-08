@@ -1,7 +1,7 @@
 {
     "manifest_version": 2,
     "name": "Speed Reading Mode",
-    "version": "0.3",
+    "version": "0.4",
     "description": "Improve reading speed by removing distraction and the need to move our eyes",
     "icons": {
         "48": "icons/speed-reading-black-512.png"

@@ -77,3 +77,8 @@
     outline: none;
     border: none;
 }
+.speed-read-image-caption {
+    font-size: .3em;
+    font-weight: bold;
+    text-align: center;
+}

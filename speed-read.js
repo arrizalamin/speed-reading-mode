@@ -33,7 +33,7 @@ const insertContainer = function() {
 				<input type="range" min=0 max=1 id="speed-read-range" />
 			</div>
 		</div>
-		<p id="speed-read-center-text"></p>
+		<div id="speed-read-center-text"></div>
 	`;
 	document.body.appendChild(container);
 };
@@ -162,6 +162,7 @@ const run = async function(settings) {
     const wait = {
         WORD: 60000 / parseInt(settings.wpm),
         PARAGRAPH_END: parseInt(settings.paragraph_end),
+        IMAGE: parseInt(settings.image),
         ARTICLE_END: 1000,
     };
     const tokens = parseArticle(articleContent, wait);
@@ -182,6 +183,17 @@ const run = async function(settings) {
     			centerText.textContent = val;
     			await sleep(delay);
     			break;
+            case TokenName.IMAGE:
+                centerText.innerHTML = `
+                    <img src="${val.url}" class="speed-read-image" />
+                    <p class="speed-read-image-caption">${val.caption}</p>
+                `;
+                if (settings.pause_img) {
+                    speedRead.setPaused(true);
+                } else {
+                    await sleep(wait.IMAGE);
+                }
+                break;
     		case TokenName.PARAGRAPH_END:
     		case TokenName.ARTICLE_END:
     			await sleep(delay);
