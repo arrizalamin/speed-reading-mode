@@ -114,6 +114,10 @@ class SpeedRead {
         }
     }
 
+    togglePaused() {
+        this.setPaused(!this.paused);
+    }
+
 	increment() {
 		if (this.totalTokens - this.counter > 1) {
 			this.timeRemaining -= this.tokens[this.counter][2];
@@ -171,6 +175,14 @@ const run = async function(settings) {
     const centerText = document.getElementById('speed-read-center-text');
     const timeRemaining = document.getElementById('speed-read-time-remaining')
 
+    const togglePauseIfSpacePressed = e => {
+        const key = e.keyCode ? e.keyCode : e.which;
+        if (key == 32) {
+            speedRead.togglePaused();
+        }
+    };
+    document.addEventListener('keyup', togglePauseIfSpacePressed);
+
     speedRead.openContainer();
     while (!speedRead.isCancelled()) {
     	const [val, type, delay] = speedRead.tokens[speedRead.counter];
@@ -201,6 +213,8 @@ const run = async function(settings) {
     	}
     	speedRead.increment();
     }
+
+    document.removeEventListener('keyup', togglePauseIfSpacePressed);
 };
 
 insertContainer();
