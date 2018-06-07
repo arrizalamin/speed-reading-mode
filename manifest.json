@@ -14,7 +14,14 @@
         "default_popup": "popup/index.html",
         "default_icon": {
             "512": "icons/speed-reading-black-512.png"
-        }
+        },
+        "theme_icons": [
+            {
+                "light": "icons/speed-reading-white-512.png",
+                "dark": "icons/speed-reading-black-512.png",
+                "size": 512
+            }
+        ]
     },
     "content_scripts": [
         {
