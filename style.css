@@ -82,3 +82,9 @@
     font-weight: bold;
     text-align: center;
 }
+
+@media print {
+    #speed-read-container.active {
+        display: none !important;
+    }
+}
